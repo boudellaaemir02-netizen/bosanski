@@ -1,0 +1,892 @@
+<!DOCTYPE html>
+<html lang="bs">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bosanski jezik i književnost - 8. Razred | Rečenični članovi</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Font Awesome Ikone -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            user-select: none;
+        }
+        /* Zoom & Pan Styles */
+        .zoom-viewport {
+            overflow: hidden;
+            position: relative;
+            width: 100%;
+            height: calc(100vh - 120px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: #0f172a;
+            cursor: grab;
+        }
+        .zoom-viewport.grabbing {
+            cursor: grabbing;
+        }
+        .zoom-container {
+            transform-origin: center center;
+            transition: transform 0.08s ease-out;
+            will-change: transform;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+        }
+        /* Custom Scrollbar for printable area */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #f1f5f9;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+        @media print {
+            .no-print {
+                display: none !important;
+            }
+            .print-only {
+                display: block !important;
+            }
+            body {
+                background: white;
+                color: black;
+            }
+        }
+    </style>
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen flex flex-col justify-between overflow-x-hidden">
+
+    <!-- TOP NAVIGATION BAR -->
+    <header class="no-print bg-slate-800/90 backdrop-blur border-b border-slate-700 sticky top-0 z-50 px-4 py-3 flex flex-wrap justify-between items-center gap-2 shadow-lg">
+        <div class="flex items-center space-x-3">
+            <span class="bg-blue-600 text-white font-bold px-2.5 py-1 rounded-lg text-sm tracking-wide">8. RAZRED</span>
+            <h1 class="text-base sm:text-lg font-semibold text-slate-100 flex items-center gap-2">
+                <i class="fa-solid font-bold fa-book-bookmark text-blue-400"></i>
+                <span>Rečenični članovi (Sintaksa)</span>
+            </h1>
+        </div>
+
+        <!-- Mode Toggle Tabs -->
+        <div class="flex items-center bg-slate-950 p-1 rounded-xl border border-slate-700/60 text-xs sm:text-sm font-medium">
+            <button id="btn-mode-presentation" onclick="switchMode('presentation')" class="flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg bg-blue-600 text-white transition-all shadow">
+                <i class="fa-solid fa-desktop"></i>
+                <span>Prezentacija</span>
+            </button>
+            <button id="btn-mode-activities" onclick="switchMode('activities')" class="flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all">
+                <i class="fa-solid fa-list-check"></i>
+                <span>Aktivnosti & Kviz</span>
+            </button>
+        </div>
+
+        <div class="hidden md:flex items-center gap-3 text-xs text-slate-400">
+            <span><i class="fa-solid fa-chalkboard-user text-blue-400 mr-1"></i> Bosanski jezik</span>
+        </div>
+    </header>
+
+    <!-- MAIN PRESENTATION VIEW -->
+    <main id="presentation-view" class="flex-1 flex flex-col justify-between relative">
+        
+        <!-- ZOOM CONTROLS TOOLBAR -->
+        <div class="no-print bg-slate-800/80 backdrop-blur border-b border-slate-700/60 px-4 py-2 flex items-center justify-between z-40 text-xs sm:text-sm text-slate-300">
+            <!-- Slide Navigation Info -->
+            <div class="flex items-center gap-2">
+                <i class="fa-solid fa-layer-group text-blue-400"></i>
+                <span id="slide-indicator" class="font-semibold text-white">Slajd 1 / 18</span>
+            </div>
+
+            <!-- Zoom Control Buttons -->
+            <div class="flex items-center gap-1 sm:gap-2 bg-slate-900/90 px-3 py-1 rounded-lg border border-slate-700/80 shadow-inner">
+                <button onclick="zoomOut()" title="Umanji (Ctrl + -)" class="p-1.5 hover:bg-slate-700 rounded text-slate-200 hover:text-white transition">
+                    <i class="fa-solid fa-magnifying-glass-minus text-sm"></i>
+                </button>
+                <span id="zoom-level" class="font-mono text-xs w-12 text-center text-blue-400 font-bold select-none">100%</span>
+                <button onclick="zoomIn()" title="Uvećaj (Ctrl + +)" class="p-1.5 hover:bg-slate-700 rounded text-slate-200 hover:text-white transition">
+                    <i class="fa-solid fa-magnifying-glass-plus text-sm"></i>
+                </button>
+                <div class="h-4 w-px bg-slate-700 mx-1"></div>
+                <button onclick="resetZoom()" title="Poništi zum (Ctrl + 0 / Esc)" class="px-2 py-1 bg-slate-800 hover:bg-slate-700 rounded text-xs text-slate-300 transition">
+                    Reset
+                </button>
+            </div>
+
+            <!-- Utility Controls (Fullscreen) -->
+            <div class="flex items-center gap-2">
+                <button onclick="toggleFullscreen()" title="Cijeli ekran (F11)" class="flex items-center gap-1.5 px-3 py-1 bg-slate-700/60 hover:bg-slate-700 text-slate-200 rounded-lg text-xs font-medium transition border border-slate-600/50">
+                    <i id="fullscreen-icon" class="fa-solid fa-expand"></i>
+                    <span class="hidden sm:inline">Puni ekran</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- ZOOM & PAN VIEWPORT -->
+        <div id="zoom-viewport" class="zoom-viewport cursor-grab select-none">
+            <div id="zoom-container" class="zoom-container">
+                <!-- SLIDE CANVAS CONTAINER -->
+                <div id="slide-card" class="w-11/12 max-w-4xl bg-slate-800 border border-slate-700/80 rounded-2xl p-6 sm:p-10 shadow-2xl transition-all duration-150 relative min-h-[420px] flex flex-col justify-between">
+                    <!-- Slide Content inserted dynamically via JS -->
+                    <div id="slide-content" class="my-auto"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- PRESENTATION BOTTOM CONTROLS -->
+        <footer class="no-print bg-slate-800/90 border-t border-slate-700 p-3 sm:p-4 flex justify-between items-center z-40">
+            <button id="btn-prev" onclick="prevSlide()" class="flex items-center gap-2 px-4 py-2 bg-slate-700 hover:bg-slate-600 active:scale-95 disabled:opacity-40 disabled:pointer-events-none rounded-xl text-slate-100 font-medium transition shadow">
+                <i class="fa-solid fa-arrow-left"></i>
+                <span class="hidden sm:inline">Prethodni</span>
+            </button>
+
+            <!-- Progress Bar -->
+            <div class="w-1/3 max-w-xs bg-slate-700 h-2 rounded-full overflow-hidden hidden sm:block">
+                <div id="progress-bar" class="bg-blue-500 h-full w-0 transition-all duration-300"></div>
+            </div>
+
+            <!-- Hint overlay for gestures/keyboard -->
+            <div class="hidden lg:flex items-center gap-2 text-xs text-slate-400 bg-slate-900/60 px-3 py-1 rounded-full border border-slate-700/50">
+                <span><i class="fa-regular fa-keyboard text-blue-400 mr-1"></i> Navigacija: Strelice <i class="fa-solid fa-arrow-left-long"></i> <i class="fa-solid fa-arrow-right-long"></i> | Zoom: Ctrl + Scroll / Drag</span>
+            </div>
+
+            <button id="btn-next" onclick="nextSlide()" class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 active:scale-95 disabled:opacity-40 disabled:pointer-events-none rounded-xl text-white font-semibold transition shadow">
+                <span class="hidden sm:inline">Sljedeći</span>
+                <i class="fa-solid fa-arrow-right"></i>
+            </button>
+        </footer>
+    </main>
+
+    <!-- ACTIVITIES & QUIZ VIEW (HIDDEN BY DEFAULT) -->
+    <section id="activities-view" class="hidden flex-1 max-w-5xl mx-auto w-full p-4 sm:p-8 space-y-8 text-slate-200">
+        <!-- Section Header -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 shadow-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+            <div>
+                <h2 class="text-2xl font-bold text-white flex items-center gap-3">
+                    <i class="fa-solid fa-clipboard-question text-blue-400"></i>
+                    Aktivnosti, Kviz i Radni Listić
+                </h2>
+                <p class="text-slate-400 text-sm mt-1">Interaktivne vježbe za provjeru znanja na času ili kod kuće.</p>
+            </div>
+            <button onclick="window.print()" class="no-print bg-emerald-600 hover:bg-emerald-500 text-white px-4 py-2.5 rounded-xl font-semibold flex items-center gap-2 transition shadow">
+                <i class="fa-solid fa-print"></i>
+                Isprintaj radni listić
+            </button>
+        </div>
+
+        <!-- Interactive Quiz Container -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl space-y-6">
+            <h3 class="text-xl font-bold text-blue-400 border-b border-slate-700 pb-3 flex items-center gap-2">
+                <i class="fa-solid fa-gamepad"></i>
+                Interaktivni Mini-Kviz
+            </h3>
+            
+            <div id="quiz-container" class="space-y-6">
+                <!-- Dynamic Quiz Questions JS -->
+            </div>
+
+            <div class="flex justify-between items-center pt-4 border-t border-slate-700">
+                <button onclick="resetQuiz()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-sm font-medium transition">
+                    Ponovi kviz
+                </button>
+                <div id="quiz-score" class="text-lg font-bold text-emerald-400"></div>
+            </div>
+        </div>
+
+        <!-- Group Exercises Accordion -->
+        <div class="bg-slate-800 border border-slate-700 rounded-2xl p-6 sm:p-8 shadow-xl space-y-4">
+            <h3 class="text-xl font-bold text-amber-400 border-b border-slate-700 pb-3 flex items-center gap-2">
+                <i class="fa-solid fa-users"></i>
+                Zadaci za rad u parovima / grupama
+            </h3>
+
+            <!-- Exercise Item 1 -->
+            <div class="border border-slate-700 rounded-xl overflow-hidden">
+                <button onclick="toggleAccordion('acc-1')" class="w-full text-left p-4 bg-slate-900/60 hover:bg-slate-900 font-semibold flex justify-between items-center transition">
+                    <span>1. Odredi rečenične članove u rečenici: "Vrijedni učenici pažljivo čitaju knjige u biblioteci."</span>
+                    <i id="icon-acc-1" class="fa-solid fa-chevron-down text-slate-400"></i>
+                </button>
+                <div id="acc-1" class="hidden p-4 bg-slate-800/80 border-t border-slate-700 text-sm space-y-2 text-slate-300">
+                    <p><strong class="text-blue-400">Subjekat:</strong> Vrijedni učenici (ko čita?)</p>
+                    <p><strong class="text-blue-400">Predikat:</strong> čitaju (šta rade? - glagolski)</p>
+                    <p><strong class="text-blue-400">Objekat:</strong> knjige (koga/šta čitaju? - direktni)</p>
+                    <p><strong class="text-blue-400">POM za mjesto:</strong> u biblioteci (gdje čitaju?)</p>
+                    <p><strong class="text-blue-400">POM za način:</strong> pažljivo (kako čitaju?)</p>
+                    <p><strong class="text-blue-400">Atribut:</strong> Vrijedni (kakvi učenici?)</p>
+                </div>
+            </div>
+
+            <!-- Exercise Item 2 -->
+            <div class="border border-slate-700 rounded-xl overflow-hidden">
+                <button onclick="toggleAccordion('acc-2')" class="w-full text-left p-4 bg-slate-900/60 hover:bg-slate-900 font-semibold flex justify-between items-center transition">
+                    <span>2. Pronađi i razvrstaj objekte: "Kupio sam bratu novu knjigu."</span>
+                    <i id="icon-acc-2" class="fa-solid fa-chevron-down text-slate-400"></i>
+                </button>
+                <div id="acc-2" class="hidden p-4 bg-slate-800/80 border-t border-slate-700 text-sm space-y-2 text-slate-300">
+                    <p><strong class="text-blue-400">Direktni objekat:</strong> novu knjigu (akuzativ bez prijedloga - koga/šta?)</p>
+                    <p><strong class="text-blue-400">Indirektni objekat:</strong> bratu (dativ - kome/čemu?)</p>
+                    <p><strong class="text-blue-400">Skriveni subjekat:</strong> Ja (izostavljen u rečenici)</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // --- SLIDES CONTENT DATA (18 SLIDES) ---
+        const slides = [
+            {
+                title: "Rečenični članovi",
+                subtitle: "Sintaksa bosanskoga jezika za 8. razred",
+                content: `
+                    <div class="text-center space-y-6">
+                        <div class="inline-block p-4 bg-blue-600/20 rounded-full border border-blue-500/30 mb-2">
+                            <i class="fa-solid fa-diagram-project text-5xl text-blue-400"></i>
+                        </div>
+                        <h2 class="text-3xl sm:text-4xl font-extrabold text-white">Rečenični članovi</h2>
+                        <p class="text-lg text-slate-300 max-w-xl mx-auto">Pregled glavnih i zavisnih rečeničnih članova, njihove službe i primjera u rečenici.</p>
+                        <div class="pt-4 flex justify-center gap-3 text-xs text-slate-400">
+                            <span class="bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-600">Glavni članovi</span>
+                            <span class="bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-600">Zavisni članovi</span>
+                            <span class="bg-slate-700/50 px-3 py-1.5 rounded-lg border border-slate-600">Sintaksa</span>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "1. Šta je sintaksa?",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-lg text-slate-200"><strong class="text-blue-400">Sintaksa</strong> je dio gramatike koji se bavi proučavanjem rečenice, pravila o spajanju riječi u sintagme i rečenice.</p>
+                        <div class="bg-slate-900/60 p-4 rounded-xl border border-slate-700 space-y-2">
+                            <h4 class="font-bold text-amber-400"><i class="fa-solid fa-lightbulb mr-2"></i>Ključni pojmovi:</h4>
+                            <ul class="list-disc list-inside text-sm text-slate-300 space-y-1">
+                                <li><strong>Riječ:</strong> Najmanja samostalna jedinica.</li>
+                                <li><strong>Sintagma:</strong> Skup od dvije ili više gramačkih povezanih riječi.</li>
+                                <li><strong>Rečenica:</strong> Zaokružena misao izrečena riječima.</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "2. Podjela rečeničnih članova",
+                content: `
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div class="bg-blue-950/40 border border-blue-800/60 p-5 rounded-xl space-y-3">
+                            <h3 class="text-xl font-bold text-blue-400 flex items-center gap-2">
+                                <i class="fa-solid fa-star"></i> Glavni članovi
+                            </h3>
+                            <p class="text-sm text-slate-300">Čine gramatičko jezgro rečenice i ne zavise od drugih članova:</p>
+                            <ul class="list-disc list-inside text-sm font-semibold text-white space-y-1">
+                                <li>Subjekat (S)</li>
+                                <li>Predikat (P)</li>
+                            </ul>
+                        </div>
+                        <div class="bg-emerald-950/40 border border-emerald-800/60 p-5 rounded-xl space-y-3">
+                            <h3 class="text-xl font-bold text-emerald-400 flex items-center gap-2">
+                                <i class="fa-solid fa-link"></i> Zavisni članovi
+                            </h3>
+                            <p class="text-sm text-slate-300">Dopunjuju ili pobliže označavaju glavne članove:</p>
+                            <ul class="list-disc list-inside text-sm font-semibold text-white space-y-1">
+                                <li>Objekat (O)</li>
+                                <li>Priloške odredbe (POM, POV, PON...)</li>
+                                <li>Atribut (At) i Apozicija (Ap)</li>
+                            </ul>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "3. Predikat (P)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-base text-slate-200"><strong>Predikat</strong> je centralni član rečenice koji kazuje šta radi subjekat, šta se s njim događa ili kakav je.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                                <span class="text-xs font-bold text-blue-400 uppercase">Glagolski predikat</span>
+                                <p class="text-white font-medium mt-1">Izrečen glagolom u ličnom glagolskom obliku.</p>
+                                <p class="text-xs text-amber-300 mt-2">Primjer: Dječak <span class="underline">trči</span> parkom.</p>
+                            </div>
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                                <span class="text-xs font-bold text-purple-400 uppercase">Imenski predikat</span>
+                                <p class="text-white font-medium mt-1">Sastoji se od pomoćnog glagola i imenske riječi.</p>
+                                <p class="text-xs text-amber-300 mt-2">Primjer: Sarajevo <span class="underline">je grad</span>.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "4. Subjekat (S)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-base text-slate-200"><strong>Subjekat</strong> označava vršioca radnje, nosioca stanja ili osobine. Odgovara na pitanja: <span class="text-blue-400 font-bold">KO? / ŠTA?</span></p>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-3 text-sm">
+                            <p class="text-slate-300"><strong class="text-white">Čime se izriče?</strong> Najčešće imenicom ili zamjenicom u <strong>nominativu</strong>.</p>
+                            <div class="border-t border-slate-800 pt-2 space-y-1">
+                                <p><strong class="text-amber-400">Izrečeni subjekat:</strong> <span class="underline">Učenici</span> uče u učionici.</p>
+                                <p><strong class="text-amber-400">Neizrečeni (skriveni) subjekat:</strong> Čitamo knjigu. <em>(Subjekat: Mi)</em></p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "5. Slaganje subjekta i predikata (Kongruencija)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-base text-slate-200"><strong>Kongruencija</strong> je gramatičko slaganje predikata sa subjektom u <strong>licu, broju irodu</strong>.</p>
+                        <div class="bg-slate-900 p-4 rounded-xl border border-slate-700 space-y-2 text-sm">
+                            <p class="text-blue-300"><i class="fa-solid fa-check text-emerald-400 mr-2"></i> <em>Djevojčica (ž.r. jedn.) je pjevala (ž.r. jedn.).</em></p>
+                            <p class="text-blue-300"><i class="fa-solid fa-check text-emerald-400 mr-2"></i> <em>Dječaci (m.r. množ.) su pjevali (m.r. množ.).</em></p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "6. Objekat (O)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-base text-slate-200"><strong>Objekat</strong> je zavisni rečenični član koji dopunjuje glagol i označava predmet radnje.</p>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-sm">
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                                <h4 class="font-bold text-blue-400">Direktni (bliži) objekat</h4>
+                                <p class="text-xs text-slate-300 mt-1">U akuzativu bez prijedloga (ili genitivu).</p>
+                                <p class="text-xs text-amber-300 mt-2">Primjer: Pišem <span class="underline">pismo</span>.</p>
+                            </div>
+                            <div class="bg-slate-900 p-4 rounded-xl border border-slate-700">
+                                <h4 class="font-bold text-emerald-400">Indirektni (dalji) objekat</h4>
+                                <p class="text-xs text-slate-300 mt-1">U ostalim kosim padežima sa ili bez prijedloga.</p>
+                                <p class="text-xs text-amber-300 mt-2">Primjer: Pomažem <span class="underline">prijatelju</span>.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "7. Priloške odredbe (PO)",
+                content: `
+                    <div class="space-y-3">
+                        <p class="text-sm text-slate-200">Priloške odredbe označavaju okolnosti pod kojima se vrši radnja predikata.</p>
+                        <div class="grid grid-cols-2 gap-2 text-xs">
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                <span class="font-bold text-blue-400">Za mjesto (POM)</span>
+                                <p class="text-slate-300">Gdje? Kuda? Odakle?</p>
+                                <p class="text-amber-300 font-mono mt-1">Živi u Sarajevu.</p>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                <span class="font-bold text-emerald-400">Za vrijeme (POV)</span>
+                                <p class="text-slate-300">Kada? Otkad? Dokad?</p>
+                                <p class="text-amber-300 font-mono mt-1">Stižemo sutra.</p>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                <span class="font-bold text-purple-400">Za način (PON)</span>
+                                <p class="text-slate-300">Kako?</p>
+                                <p class="text-amber-300 font-mono mt-1">Čita naglas.</p>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                <span class="font-bold text-amber-400">Za uzrok (POU)</span>
+                                <p class="text-slate-300">Zašto? Iz kog razloga?</p>
+                                <p class="text-amber-300 font-mono mt-1">Kasi zbog kiše.</p>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "8. Atribut (At)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-base text-slate-200"><strong>Atribut</strong> je zavisni član koji dopunjuje imenicu dajući joj dodatne osobine ili kvalitet.</p>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-2 text-sm">
+                            <p class="text-slate-300">Odgovara na pitanja: <strong class="text-blue-400">Kakav? Čiji? Koji? Koliki?</strong></p>
+                            <p class="text-amber-300 pt-2"><i class="fa-solid fa-quote-left text-slate-500 mr-2"></i><span class="underline">Vrijedni</span> učenik čita <span class="underline">zanimljivu</span> knjigu.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "9. Apozicija (Ap)",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-base text-slate-200"><strong>Apozicija</strong> je samostalni dodatak imenici koji na drugi način kazuje isto što i imenica.</p>
+                        <div class="bg-slate-900/80 p-4 rounded-xl border border-slate-700 space-y-3 text-sm">
+                            <p class="text-slate-300">Uvijek se slaže sa imenicom u padežu i obično se odvaja zarezima ako je iza imenice.</p>
+                            <p class="text-amber-300 font-medium"><i class="fa-solid fa-quote-left text-slate-500 mr-2"></i>Sarajevo, <span class="underline">glavni grad Bosne i Hercegovine</span>, leži na Miljacki.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "10. Samostalni rečenični članovi",
+                content: `
+                    <div class="space-y-4">
+                        <p class="text-sm text-slate-200">Riječi ili skupovi riječi koji nisu gramatički povezani sa ostalim dijelovima rečenice:</p>
+                        <div class="space-y-2 text-sm">
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                <strong class="text-blue-400">Vokativ (dozivanje):</strong> <em><span class="underline">Emina</span>, dođi ovamo!</em>
+                            </div>
+                            <div class="bg-slate-900 p-3 rounded-lg border border-slate-700">
+                                <strong class="text-emerald-400">Umetnute riječi / rečenice:</strong> <em>To je, <span class="underline">nažalost</span>, istina.</em>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "11. Shematski prikaz rečenice",
+                content: `
+                    <div class="text-center space-y-4">
+                        <p class="text-xs text-slate-400">Analiza strukture složene rečenice:</p>
+                        <div class="bg-slate-950 p-4 rounded-xl border border-slate-700 text-sm font-mono space-y-2">
+                            <div class="text-amber-400 font-bold">"Mali dječak brzo trči prema školi."</div>
+                            <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-xs pt-3 text-slate-300">
+                                <div class="bg-slate-800 p-2 rounded">Mali = Atribut</div>
+                                <div class="bg-slate-800 p-2 rounded">dječak = Subjekat</div>
+                                <div class="bg-slate-800 p-2 rounded">brzo = PON</div>
+                                <div class="bg-slate-800 p-2 rounded">trči = Predikat</div>
+                            </div>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "12. Primjeri za vježbu #1",
+                content: `
+                    <div class="space-y-3 text-sm">
+                        <p class="text-slate-300">Pronađimo subjekat i predikat:</p>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                            <p>1. <em>"Na nebu sija sunce."</em></p>
+                            <p class="text-xs text-blue-400 mt-1">Subjekat: sunce | Predikat: sija</p>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                            <p>2. <em>"Jučer smo gledali zanimljiv film."</em></p>
+                            <p class="text-xs text-blue-400 mt-1">Subjekat: Mi (skriveni) | Predikat: smo gledali</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "13. Primjeri za vježbu #2",
+                content: `
+                    <div class="space-y-3 text-sm">
+                        <p class="text-slate-300">Pronađimo objekte i priloške odredbe:</p>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                            <p>1. <em>"Učenici u kabinetu rade test."</em></p>
+                            <p class="text-xs text-emerald-400 mt-1">POM: u kabinetu | Objekat: test</p>
+                        </div>
+                        <div class="bg-slate-900 p-3 rounded-xl border border-slate-700">
+                            <p>2. <em>"Tiho pokucah na vrata."</em></p>
+                            <p class="text-xs text-emerald-400 mt-1">PON: tiho | Indirektni objekat / POM: na vrata</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "14. Najčešće greške u analizi",
+                content: `
+                    <div class="space-y-3 text-sm">
+                        <div class="bg-red-950/40 border border-red-800/60 p-3 rounded-xl">
+                            <strong class="text-red-400">Zamjena subjekta i objekta:</strong>
+                            <p class="text-xs text-slate-300 mt-1">U rečenici <em>"Knjigu čita dječak"</em>, subjekat je <strong>dječak</strong> (ko čita?), a ne knjiga!</p>
+                        </div>
+                        <div class="bg-red-950/40 border border-red-800/60 p-3 rounded-xl">
+                            <strong class="text-red-400">Zaboravljanje skrivenog subjekta:</strong>
+                            <p class="text-xs text-slate-300 mt-1">Svaka lična glagolska rečenica ima subjekat, čak i kada nije izrečen pismeno.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "15. Rezime - Glavni članovi",
+                content: `
+                    <div class="space-y-3 text-sm">
+                        <div class="p-3 bg-slate-900 rounded-xl border border-slate-700">
+                            <h4 class="font-bold text-blue-400">Predikat</h4>
+                            <p class="text-xs text-slate-300">Srce rečenice. Može biti glagolski ili imenski.</p>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-xl border border-slate-700">
+                            <h4 class="font-bold text-blue-400">Subjekat</h4>
+                            <p class="text-xs text-slate-300">Vršilac radnje (Nominativ / Ko? Šta?).</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "16. Rezime - Zavisni članovi",
+                content: `
+                    <div class="space-y-3 text-sm">
+                        <div class="p-3 bg-slate-900 rounded-xl border border-slate-700">
+                            <h4 class="font-bold text-emerald-400">Objekat & POM/POV/PON</h4>
+                            <p class="text-xs text-slate-300">Dopunjuju glagol u predikatu.</p>
+                        </div>
+                        <div class="p-3 bg-slate-900 rounded-xl border border-slate-700">
+                            <h4 class="font-bold text-emerald-400">Atribut & Apozicija</h4>
+                            <p class="text-xs text-slate-300">Dopunjuju imeničke riječi u rečenici.</p>
+                        </div>
+                    </div>
+                `
+            },
+            {
+                title: "17. Pitanja za ponavljanje",
+                content: `
+                    <div class="space-y-2 text-sm">
+                        <ol class="list-decimal list-inside space-y-2 text-slate-200">
+                            <li>Koja je razlika između glagolskog i imenskog predikata?</li>
+                            <li>U kojem padežu stoji direktni objekat?</li>
+                            <li>Koje su najčešće priloške odredbe?</li>
+                            <li>Šta je apozicija i kako se odvajala u pisanju?</li>
+                        </ol>
+                    </div>
+                `
+            },
+            {
+                title: "18. Hvala na pažnji!",
+                content: `
+                    <div class="text-center space-y-6 py-4">
+                        <div class="inline-block p-4 bg-emerald-600/20 rounded-full border border-emerald-500/30">
+                            <i class="fa-solid fa-circle-check text-5xl text-emerald-400"></i>
+                        </div>
+                        <h2 class="text-3xl font-extrabold text-white">Uspješno obrađena lekcija!</h2>
+                        <p class="text-slate-300">Sada možete preći na karticu <strong>"Aktivnosti & Kviz"</strong> na vrhu stranice za provjeru znanja.</p>
+                    </div>
+                `
+            }
+        ];
+
+        // --- QUIZ DATA ---
+        const quizQuestions = [
+            {
+                q: "1. Koji je glavni rečenični član koji označava vršioca radnje?",
+                options: ["Objekat", "Subjekat", "Atribut", "Predikat"],
+                correct: 1
+            },
+            {
+                q: "2. U rečenici 'Kupio sam novu torbu', reč 'torbu' ima službu:",
+                options: ["Direktnog objekta", "Indirektnog objekta", "Subjekta", "Atributa"],
+                correct: 0
+            },
+            {
+                q: "3. Kakav je predikat u rečenici 'Sarajevo je prelijep grad'?",
+                options: ["Glagolski", "Imenski", "Skriveni", "Priloški"],
+                correct: 1
+            }
+        ];
+
+        // --- STATE MANAGEMENT ---
+        let currentSlide = 0;
+        let zoomScale = 1;
+        const MIN_ZOOM = 0.6;
+        const MAX_ZOOM = 2.2;
+        const ZOOM_STEP = 0.15;
+
+        // Pan/Drag variables
+        let isDragging = false;
+        let startX, startY;
+        let translateX = 0, translateY = 0;
+
+        // DOM Elements
+        const slideCard = document.getElementById('slide-card');
+        const slideContent = document.getElementById('slide-content');
+        const slideIndicator = document.getElementById('slide-indicator');
+        const progressBar = document.getElementById('progress-bar');
+        const btnPrev = document.getElementById('btn-prev');
+        const btnNext = document.getElementById('btn-next');
+        const zoomContainer = document.getElementById('zoom-container');
+        const zoomViewport = document.getElementById('zoom-viewport');
+        const zoomLevelDisplay = document.getElementById('zoom-level');
+
+        // --- INITIALIZATION ---
+        window.onload = function() {
+            renderSlide();
+            renderQuiz();
+            setupPanZoomEvents();
+            setupKeyboardShortcuts();
+        };
+
+        // --- SLIDE RENDERER ---
+        function renderSlide() {
+            const slide = slides[currentSlide];
+            slideContent.innerHTML = `
+                <div class="border-b border-slate-700/80 pb-3 mb-4">
+                    <span class="text-xs font-bold text-blue-400 uppercase tracking-widest">Lekcija • Slajd ${currentSlide + 1}</span>
+                    <h2 class="text-2xl sm:text-3xl font-extrabold text-white mt-1">${slide.title}</h2>
+                </div>
+                <div>${slide.content}</div>
+            `;
+
+            slideIndicator.textContent = `Slajd ${currentSlide + 1} / ${slides.length}`;
+            progressBar.style.width = `${((currentSlide + 1) / slides.length) * 100}%`;
+
+            btnPrev.disabled = currentSlide === 0;
+            btnNext.disabled = currentSlide === slides.length - 1;
+
+            // Reset pan coordinates on slide change
+            translateX = 0;
+            translateY = 0;
+            applyTransform();
+        }
+
+        function nextSlide() {
+            if (currentSlide < slides.length - 1) {
+                currentSlide++;
+                renderSlide();
+            }
+        }
+
+        function prevSlide() {
+            if (currentSlide > 0) {
+                currentSlide--;
+                renderSlide();
+            }
+        }
+
+        // --- MODE SWITCHER ---
+        function switchMode(mode) {
+            const presView = document.getElementById('presentation-view');
+            const actView = document.getElementById('activities-view');
+            const btnPres = document.getElementById('btn-mode-presentation');
+            const btnAct = document.getElementById('btn-mode-activities');
+
+            if (mode === 'presentation') {
+                presView.classList.remove('hidden');
+                actView.classList.add('hidden');
+                btnPres.className = "flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg bg-blue-600 text-white transition-all shadow";
+                btnAct.className = "flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+            } else {
+                presView.classList.add('hidden');
+                actView.classList.remove('hidden');
+                btnAct.className = "flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg bg-blue-600 text-white transition-all shadow";
+                btnPres.className = "flex items-center gap-2 px-3 sm:px-4 py-1.5 rounded-lg text-slate-400 hover:text-white transition-all";
+            }
+        }
+
+        // --- ZOOM LOGIC ---
+        function setZoom(newScale) {
+            zoomScale = Math.max(MIN_ZOOM, Math.min(MAX_ZOOM, newScale));
+            zoomLevelDisplay.textContent = `${Math.round(zoomScale * 100)}%`;
+            applyTransform();
+        }
+
+        function zoomIn() {
+            setZoom(zoomScale + ZOOM_STEP);
+        }
+
+        function zoomOut() {
+            setZoom(zoomScale - ZOOM_STEP);
+        }
+
+        function resetZoom() {
+            zoomScale = 1;
+            translateX = 0;
+            translateY = 0;
+            zoomLevelDisplay.textContent = "100%";
+            applyTransform();
+        }
+
+        function applyTransform() {
+            zoomContainer.style.transform = `translate(${translateX}px, ${translateY}px) scale(${zoomScale})`;
+        }
+
+        // --- PAN & MOUSE INTERACTIONS ---
+        function setupPanZoomEvents() {
+            // Mouse Wheel Zoom (Ctrl + Wheel or Pinch)
+            zoomViewport.addEventListener('wheel', (e) => {
+                if (e.ctrlKey || e.metaKey) {
+                    e.preventDefault();
+                    if (e.deltaY < 0) {
+                        zoomIn();
+                    } else {
+                        zoomOut();
+                    }
+                }
+            }, { passive: false });
+
+            // Drag / Pan logic
+            zoomViewport.addEventListener('mousedown', (e) => {
+                if (e.button === 0) { // Left click
+                    isDragging = true;
+                    startX = e.clientX - translateX;
+                    startY = e.clientY - translateY;
+                    zoomViewport.classList.add('grabbing');
+                }
+            });
+
+            window.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                translateX = e.clientX - startX;
+                translateY = e.clientY - startY;
+                applyTransform();
+            });
+
+            window.addEventListener('mouseup', () => {
+                isDragging = false;
+                zoomViewport.classList.remove('grabbing');
+            });
+
+            // Touch events for mobile/tablets (Pinch & Drag)
+            let initialTouchDist = 0;
+
+            zoomViewport.addEventListener('touchstart', (e) => {
+                if (e.touches.length === 1) {
+                    isDragging = true;
+                    startX = e.touches[0].clientX - translateX;
+                    startY = e.touches[0].clientY - translateY;
+                } else if (e.touches.length === 2) {
+                    isDragging = false;
+                    initialTouchDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                }
+            });
+
+            zoomViewport.addEventListener('touchmove', (e) => {
+                if (isDragging && e.touches.length === 1) {
+                    translateX = e.touches[0].clientX - startX;
+                    translateY = e.touches[0].clientY - startY;
+                    applyTransform();
+                } else if (e.touches.length === 2) {
+                    const currentDist = Math.hypot(
+                        e.touches[0].clientX - e.touches[1].clientX,
+                        e.touches[0].clientY - e.touches[1].clientY
+                    );
+                    const diff = currentDist - initialTouchDist;
+                    if (Math.abs(diff) > 10) {
+                        setZoom(zoomScale + (diff > 0 ? 0.03 : -0.03));
+                        initialTouchDist = currentDist;
+                    }
+                }
+            });
+
+            zoomViewport.addEventListener('touchend', () => {
+                isDragging = false;
+            });
+        }
+
+        // --- KEYBOARD SHORTCUTS ---
+        function setupKeyboardShortcuts() {
+            window.addEventListener('keydown', (e) => {
+                // Ignore shortcuts if user is typing in form inputs (if any)
+                if (['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+                // Slide navigation
+                if (e.key === 'ArrowRight' || e.key === 'PageDown') {
+                    nextSlide();
+                } else if (e.key === 'ArrowLeft' || e.key === 'PageUp') {
+                    prevSlide();
+                }
+
+                // Zoom shortcuts
+                if ((e.ctrlKey || e.metaKey) && (e.key === '+' || e.key === '=')) {
+                    e.preventDefault();
+                    zoomIn();
+                } else if ((e.ctrlKey || e.metaKey) && (e.key === '-')) {
+                    e.preventDefault();
+                    zoomOut();
+                } else if ((e.ctrlKey || e.metaKey) && (e.key === '0')) {
+                    e.preventDefault();
+                    resetZoom();
+                } else if (e.key === 'Escape') {
+                    resetZoom();
+                }
+            });
+        }
+
+        // --- FULLSCREEN TOGGLE ---
+        function toggleFullscreen() {
+            const icon = document.getElementById('fullscreen-icon');
+            if (!document.fullscreenElement) {
+                document.documentElement.requestFullscreen().then(() => {
+                    icon.className = "fa-solid fa-compress";
+                }).catch(err => console.log(err));
+            } else {
+                if (document.exitFullscreen) {
+                    document.exitFullscreen().then(() => {
+                        icon.className = "fa-solid fa-expand";
+                    });
+                }
+            }
+        }
+
+        // --- QUIZ LOGIC ---
+        function renderQuiz() {
+            const container = document.getElementById('quiz-container');
+            container.innerHTML = quizQuestions.map((q, qIndex) => `
+                <div class="space-y-3 bg-slate-900/60 p-4 rounded-xl border border-slate-700">
+                    <p class="font-semibold text-slate-100">${q.q}</p>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        ${q.options.map((opt, oIndex) => `
+                            <button onclick="checkAnswer(${qIndex}, ${oIndex}, this)" 
+                                    class="quiz-btn-${qIndex} text-left p-3 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-sm font-medium transition">
+                                ${opt}
+                            </button>
+                        `).join('')}
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        let userAnswers = {};
+
+        function checkAnswer(qIndex, oIndex, btn) {
+            const correctIndex = quizQuestions[qIndex].correct;
+            const buttons = document.querySelectorAll(`.quiz-btn-${qIndex}`);
+
+            buttons.forEach((b, idx) => {
+                b.disabled = true;
+                if (idx === correctIndex) {
+                    b.classList.add('bg-emerald-600', 'text-white', 'border-emerald-500');
+                } else if (idx === oIndex) {
+                    b.classList.add('bg-red-600', 'text-white', 'border-red-500');
+                }
+            });
+
+            userAnswers[qIndex] = oIndex === correctIndex;
+            updateQuizScore();
+        }
+
+        function updateQuizScore() {
+            const scoreDisplay = document.getElementById('quiz-score');
+            const answeredCount = Object.keys(userAnswers).length;
+            const correctCount = Object.values(userAnswers).filter(Boolean).length;
+
+            if (answeredCount > 0) {
+                scoreDisplay.textContent = `Rezultat: ${correctCount} / ${quizQuestions.length}`;
+            } else {
+                scoreDisplay.textContent = '';
+            }
+        }
+
+        function resetQuiz() {
+            userAnswers = {};
+            document.getElementById('quiz-score').textContent = '';
+            renderQuiz();
+        }
+
+        // --- ACCORDION TOGGLE ---
+        function toggleAccordion(id) {
+            const content = document.getElementById(id);
+            const icon = document.getElementById(`icon-${id}`);
+            if (content.classList.contains('hidden')) {
+                content.classList.remove('hidden');
+                icon.className = "fa-solid fa-chevron-up text-blue-400";
+            } else {
+                content.classList.add('hidden');
+                icon.className = "fa-solid fa-chevron-down text-slate-400";
+            }
+        }
+    </script>
+</body>
+</html>
